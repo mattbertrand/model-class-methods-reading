@@ -1,7 +1,18 @@
 class PostsController < ApplicationController
 
+
   def index
-    @posts = Post.all
+    @authors = Author.all
+    if !params[:author].blank?
+      @posts = Post.by_author(params[:author])
+    elsif !params[:date].blank?
+      if params[:date] == "Today"
+        @posts = Post.from_today
+      else
+        @posts = Post.old_news
+      end
+      @posts = Post.all
+    end
   end
 
   def show
@@ -13,7 +24,7 @@ class PostsController < ApplicationController
   end
 
   def create
-    @post = Post.new(params)
+    @post = Post.new(post_params)
     @post.save
     redirect_to post_path(@post)
   end
@@ -26,5 +37,10 @@ class PostsController < ApplicationController
 
   def edit
     @post = Post.find(params[:id])
+  end
+
+  private
+  def post_params
+    params.require(:post).permit(:title, :description)
   end
 end
